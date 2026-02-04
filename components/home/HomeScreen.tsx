@@ -1,22 +1,22 @@
+import { useLayout } from "@/providers/LayoutProvider";
+import { useTheme } from "@/providers/ThemeProvider";
 import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useLayout } from "../../providers/LayoutProvider";
-import { useTheme } from "../../providers/ThemeProvider";
 
-// Example screen: placeholder for future content.
-export default function ExampleScreen() {
+// Home screen: landing page after authentication.
+export function HomeScreen() {
   const { colors } = useTheme();
   const { setTitle } = useLayout();
 
   useEffect(() => {
-    setTitle("Example");
+    setTitle("Home");
   }, [setTitle]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>Example</Text>
+      <Text style={[styles.title, { color: colors.text }]}>Home</Text>
       <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-        This is a placeholder page. Add more screens here.
+        You are logged in. Use the bottom tabs to explore.
       </Text>
     </View>
   );
