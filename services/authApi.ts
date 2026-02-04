@@ -7,6 +7,14 @@ export type AuthUser = {
   email: string;
 };
 
+export type AuthSession = {
+  user: AuthUser;
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresAt: number;
+  refreshTokenExpiresAt: number;
+};
+
 export type AuthLoginInput = {
   email: string;
   password: string;
@@ -30,10 +38,36 @@ let mockUsers: MockUserRecord[] = [
 ];
 
 const resetCodes = new Map<string, string>();
+const refreshTokens = new Map<string, { userId: string; expiresAt: number }>();
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function loginApi(input: AuthLoginInput): Promise<AuthUser> {
+const createMockToken = (userId: string, type: "access" | "refresh") => {
+  const random = Math.random().toString(36).slice(2);
+  return `${type}.${userId}.${random}`;
+};
+
+const buildSession = (user: AuthUser): AuthSession => {
+  const accessTokenExpiresAt = Date.now() + 15 * 60 * 1000;
+  const refreshTokenExpiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  const accessToken = createMockToken(user.id, "access");
+  const refreshToken = createMockToken(user.id, "refresh");
+
+  refreshTokens.set(refreshToken, {
+    userId: user.id,
+    expiresAt: refreshTokenExpiresAt,
+  });
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+    accessTokenExpiresAt,
+    refreshTokenExpiresAt,
+  };
+};
+
+export async function loginApi(input: AuthLoginInput): Promise<AuthSession> {
   await wait(600);
 
   const user = mockUsers.find(
@@ -43,10 +77,14 @@ export async function loginApi(input: AuthLoginInput): Promise<AuthUser> {
     throw new Error("Invalid email or password.");
   }
 
-  return { id: user.id, username: user.username, email: user.email };
+  return buildSession({
+    id: user.id,
+    username: user.username,
+    email: user.email,
+  });
 }
 
-export async function signupApi(input: AuthSignupInput): Promise<AuthUser> {
+export async function signupApi(input: AuthSignupInput): Promise<AuthSession> {
   await wait(700);
 
   const existing = mockUsers.find(
@@ -65,7 +103,27 @@ export async function signupApi(input: AuthSignupInput): Promise<AuthUser> {
 
   mockUsers = [...mockUsers, newUser];
 
-  return { id: newUser.id, username: newUser.username, email: newUser.email };
+  return buildSession({
+    id: newUser.id,
+    username: newUser.username,
+    email: newUser.email,
+  });
+}
+
+export async function refreshAccessTokenApi(
+  refreshToken: string,
+): Promise<{ accessToken: string; accessTokenExpiresAt: number }> {
+  await wait(400);
+
+  const record = refreshTokens.get(refreshToken);
+  if (!record || record.expiresAt <= Date.now()) {
+    throw new Error("Refresh token expired. Please log in again.");
+  }
+
+  const accessToken = createMockToken(record.userId, "access");
+  const accessTokenExpiresAt = Date.now() + 15 * 60 * 1000;
+
+  return { accessToken, accessTokenExpiresAt };
 }
 
 export async function sendResetCodeApi(
