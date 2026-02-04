@@ -1,50 +1,61 @@
-# Welcome to your Expo app 👋
+# PartFinder Front-End
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Minimal authentication flow with structured routing, providers, and a protected app shell.
 
-## Get started
+## Directory overview
+
+- app/
+  - (auth)/
+    - \_layout.tsx: Auth stack (login/signup/forgot-password).
+    - login.tsx: Login screen (email + password).
+    - signup.tsx: Signup screen (username + email + password + confirm).
+    - forgot-password.tsx: Email -> 6-digit code -> new password flow.
+  - (app)/
+    - \_layout.tsx: Protected app layout with top/bottom navbars.
+    - home.tsx: Home screen after login.
+    - example.tsx: Example placeholder screen.
+  - \_layout.tsx: Root layout wiring providers + router.
+  - index.tsx: Redirects to auth or app based on login state.
+
+- components/
+  - FormInput.tsx: Labeled input for forms.
+  - PrimaryButton.tsx: Primary action button.
+  - TopNavbar.tsx: Top bar with title + logout.
+  - BottomNavbar.tsx: Bottom tab navigation (Home, Example).
+
+- providers/
+  - ThemeProvider.tsx: Theme tokens for consistent colors.
+  - AuthProvider.tsx: Auth state + actions (login, signup, reset).
+  - LayoutProvider.tsx: Layout state (top bar title).
+
+- services/
+  - authApi.ts: Mock API calls (replace with real APIs later).
+
+## How auth works
+
+- `AuthProvider` exposes `login`, `signup`, `sendResetCode`, `resetPassword`, and `logout`.
+- `app/index.tsx` redirects to login or home based on `isAuthenticated`.
+- `app/(app)/_layout.tsx` protects routes; unauthenticated users are redirected to login.
+
+## How to add new pages and show them in the bottom navbar
+
+1. Add a new file inside app/(app)/. Example: app/(app)/profile.tsx.
+2. Update the bottom navbar to include the new route.
+   - Edit components/BottomNavbar.tsx and add a new tab button that routes to /(app)/profile.
+3. Set the top title inside the page:
+   - Use `useLayout()` and call `setTitle("Profile")` in a useEffect.
+
+## Mock API behavior
+
+- `services/authApi.ts` holds in-memory mock users and reset codes.
+- Replace each function body with real API calls when your backend is ready.
+
+## Run the app
 
 1. Install dependencies
 
-   ```bash
    npm install
-   ```
 
 2. Start the app
 
-   ```bash
    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
