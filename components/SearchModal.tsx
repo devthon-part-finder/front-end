@@ -1,7 +1,11 @@
+import { useTheme } from "@/providers/ThemeProvider";
 import React, { useState } from "react";
 import {
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     Pressable,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -21,6 +25,7 @@ export function SearchModal({
   onSearch,
   onCameraPress,
 }: SearchModalProps) {
+  const { colors } = useTheme();
   const [selectedCoin, setSelectedCoin] = useState("");
   const [description, setDescription] = useState("");
   const [showCoinPicker, setShowCoinPicker] = useState(false);
@@ -47,100 +52,118 @@ export function SearchModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-          {/* Handle bar */}
-          <View style={styles.handleBar} />
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
+      >
+        <Pressable style={styles.overlay} onPress={onClose}>
+          <Pressable style={[styles.modalContent, { backgroundColor: colors.background }]} onPress={(e) => e.stopPropagation()}>
+            {/* Handle bar */}
+            <View style={[styles.handleBar, { backgroundColor: colors.border }]} />
 
-          {/* Camera Input */}
-          <View style={styles.section}>
-            <Pressable style={styles.cameraInput} onPress={onCameraPress}>
-              <Text style={styles.cameraPlaceholder}>Capture your item</Text>
-              <View style={styles.cameraIconContainer}>
-                <Text style={styles.cameraIcon}>📷</Text>
-              </View>
-            </Pressable>
-          </View>
-
-          {/* Select Coin */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Select Coin</Text>
-            <Pressable
-              style={styles.picker}
-              onPress={() => setShowCoinPicker(!showCoinPicker)}
+            <ScrollView 
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
-              <Text style={[styles.pickerText, !selectedCoin && styles.placeholder]}>
-                {selectedCoin || "Choose a coin..."}
-              </Text>
-              <Text style={styles.arrow}>▼</Text>
-            </Pressable>
-
-            {showCoinPicker && (
-              <View style={styles.pickerDropdown}>
-                {coins.map((coin) => (
-                  <Pressable
-                    key={coin}
-                    style={styles.pickerOption}
-                    onPress={() => {
-                      setSelectedCoin(coin);
-                      setShowCoinPicker(false);
-                    }}
-                  >
-                    <Text style={styles.pickerOptionText}>{coin}</Text>
-                  </Pressable>
-                ))}
+              {/* Camera Input */}
+              <View style={styles.section}>
+                <Pressable style={[styles.cameraInput, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={onCameraPress}>
+                  <Text style={[styles.cameraPlaceholder, { color: colors.mutedText }]}>Capture your item</Text>
+                  <View style={styles.cameraIconContainer}>
+                    <Text style={styles.cameraIcon}>📷</Text>
+                  </View>
+                </Pressable>
               </View>
-            )}
-          </View>
 
-          {/* Description */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Description (Optional)</Text>
-            <Pressable style={styles.picker} onPress={() => {}}>
-              <TextInput
-                style={styles.pickerText}
-                placeholder="Add any additional details..."
-                placeholderTextColor="#9CA3AF"
-                value={description}
-                onChangeText={setDescription}
-                multiline
-              />
-            </Pressable>
-          </View>
+              {/* Select Coin */}
+              <View style={styles.section}>
+                <Text style={[styles.label, { color: colors.text }]}>Select Coin</Text>
+                <Pressable
+                  style={[styles.picker, { borderColor: colors.border, backgroundColor: colors.background }]}
+                  onPress={() => setShowCoinPicker(!showCoinPicker)}
+                >
+                  <Text style={[styles.pickerText, { color: colors.text }, !selectedCoin && { color: colors.mutedText }]}>
+                    {selectedCoin || "Choose a coin..."}
+                  </Text>
+                  <Text style={[styles.arrow, { color: colors.mutedText }]}>▼</Text>
+                </Pressable>
 
-          {/* Search Button */}
-          <Pressable
-            style={[styles.searchButton, !selectedCoin && styles.searchButtonDisabled]}
-            onPress={handleSearch}
-            disabled={!selectedCoin}
-          >
-            <Text style={styles.searchButtonText}>Search Your Item</Text>
+                {showCoinPicker && (
+                  <View style={[styles.pickerDropdown, { borderColor: colors.border, backgroundColor: colors.background }]}>
+                    <ScrollView 
+                      nestedScrollEnabled={true}
+                      showsVerticalScrollIndicator={true}
+                      style={styles.pickerScrollView}
+                    >
+                      {coins.map((coin) => (
+                        <Pressable
+                          key={coin}
+                          style={[styles.pickerOption, { borderBottomColor: colors.surface }]}
+                          onPress={() => {
+                            setSelectedCoin(coin);
+                            setShowCoinPicker(false);
+                          }}
+                        >
+                          <Text style={[styles.pickerOptionText, { color: colors.text }]}>{coin}</Text>
+                        </Pressable>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
+              </View>
+
+              {/* Description */}
+              <View style={styles.section}>
+                <Text style={[styles.label, { color: colors.text }]}>Description (Optional)</Text>
+                <View style={[styles.picker, { borderColor: colors.border, backgroundColor: colors.background }]}>
+                  <TextInput
+                    style={[styles.pickerText, { color: colors.text }]}
+                    placeholder="Add any additional details..."
+                    placeholderTextColor={colors.mutedText}
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+              </View>
+
+              {/* Search Button */}
+              <Pressable
+                style={[styles.searchButton, { backgroundColor: colors.primary }, !selectedCoin && { backgroundColor: colors.border }]}
+                onPress={handleSearch}
+                disabled={!selectedCoin}
+              >
+                <Text style={[styles.searchButtonText, { color: colors.text }]}>Search Your Item</Text>
+              </Pressable>
+            </ScrollView>
           </Pressable>
         </Pressable>
-      </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 40,
-    minHeight: 400,
+    maxHeight: "90%",
   },
   handleBar: {
     width: 40,
     height: 4,
-    backgroundColor: "#E5E7EB",
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 20,
@@ -153,15 +176,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 2,
-    borderColor: "#E5E7EB",
     borderStyle: "dashed",
     borderRadius: 12,
     padding: 16,
-    backgroundColor: "#F9FAFB",
   },
   cameraPlaceholder: {
     fontSize: 14,
-    color: "#9CA3AF",
   },
   cameraIconContainer: {
     flexDirection: "row",
@@ -174,7 +194,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000000",
     marginBottom: 8,
   },
   picker: {
@@ -182,53 +201,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
     borderRadius: 12,
     padding: 16,
-    backgroundColor: "#FFFFFF",
   },
   pickerText: {
     flex: 1,
     fontSize: 14,
-    color: "#000000",
-  },
-  placeholder: {
-    color: "#9CA3AF",
   },
   arrow: {
     fontSize: 12,
-    color: "#9CA3AF",
   },
   pickerDropdown: {
     marginTop: 8,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
     borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    maxHeight: 200,
+    overflow: "hidden",
+  },
+  pickerScrollView: {
     maxHeight: 200,
   },
   pickerOption: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
   },
   pickerOptionText: {
     fontSize: 14,
-    color: "#000000",
   },
   searchButton: {
-    backgroundColor: "#FCD34D",
     borderRadius: 12,
     padding: 18,
     alignItems: "center",
     marginTop: 20,
   },
-  searchButtonDisabled: {
-    backgroundColor: "#E5E7EB",
-  },
   searchButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000000",
   },
 });

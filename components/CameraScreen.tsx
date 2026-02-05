@@ -1,3 +1,6 @@
+import { useTheme } from "@/providers/ThemeProvider";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
     Alert,
@@ -5,7 +8,7 @@ import {
     Pressable,
     StyleSheet,
     Text,
-    View,
+    View
 } from "react-native";
 
 interface CameraScreenProps {
@@ -14,13 +17,101 @@ interface CameraScreenProps {
 }
 
 export function CameraScreen({ onCapture, onClose }: CameraScreenProps) {
+  const { colors } = useTheme();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleCapture = () => {
-    // Simulate camera capture
-    const mockImageUri = "https://placeholder.co/400x300/666/FFF?text=Captured";
-    setCapturedImage(mockImageUri);
-    Alert.alert("Camera", "Image captured successfully!");
+  // Don't auto-open camera - let user trigger it manually
+
+  const openCamera = async () => {
+    try {
+      console.log("Opening camera...");
+      setIsLoading(true);
+      
+      // Set a timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.log("Camera timeout - taking too long");
+        setIsLoading(false);
+        Alert.alert(
+          "Camera Timeout",
+          "Camera is taking too long to open. Please use the gallery instead.",
+          [{ text: "OK" }]
+        );
+      }, 5000); // 5 second timeout
+
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      console.log("Camera permission status:", status);
+      
+      if (status !== "granted") {
+        clearTimeout(timeoutId);
+        console.log("Camera permission denied");
+        Alert.alert(
+          "Camera Permission Required",
+          "Please grant camera permission to capture images, or use gallery instead.",
+          [{ text: "OK" }]
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Launching camera...");
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      clearTimeout(timeoutId);
+      console.log("Camera result:", result);
+      setIsLoading(false);
+
+      if (!result.canceled && result.assets[0]) {
+        console.log("Image captured:", result.assets[0].uri);
+        setCapturedImage(result.assets[0].uri);
+      } else {
+        console.log("Camera canceled");
+        // User canceled camera, stay on screen to allow gallery option
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Camera error:", error);
+      setIsLoading(false);
+      Alert.alert(
+        "Camera Error",
+        `Failed to open camera: ${error}. Please try using the gallery instead.`,
+        [{ text: "OK" }]
+      );
+    }
+  };
+
+  const openGallery = async () => {
+    try {
+      setIsLoading(true);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      setIsLoading(false);
+
+      if (!result.canceled && result.assets[0]) {
+        setCapturedImage(result.assets[0].uri);
+      } else {
+        onClose();
+      }
+    } catch (error) {
+      console.error("Gallery error:", error);
+      setIsLoading(false);
+      Alert.alert("Error", "Failed to open gallery");
+    }
+  };
+
+  const handleRetake = () => {
+    setCapturedImage(null);
+    // Don't auto-open, let user choose again
   };
 
   const handleConfirm = () => {
@@ -30,43 +121,64 @@ export function CameraScreen({ onCapture, onClose }: CameraScreenProps) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.black }]}>
       {/* Camera Viewfinder */}
       <View style={styles.viewfinder}>
         {capturedImage ? (
           <Image source={{ uri: capturedImage }} style={styles.preview} />
         ) : (
-          <>
-            {/* Detection Box */}
-            <View style={styles.detectionBox} />
-            
-            {/* Flash Button */}
-            <Pressable style={styles.flashButton}>
-              <Text style={styles.flashIcon}>⚡</Text>
-            </Pressable>
-          </>
+          <View style={styles.loadingContainer}>
+            {isLoading ? (
+              <>
+                <Ionicons name="camera-outline" size={64} color="#FFFFFF" style={styles.centerIcon} />
+                <Text style={styles.loadingText}>Opening Camera...</Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="scan-outline" size={80} color="rgba(255, 255, 255, 0.3)" style={styles.centerIcon} />
+                <Text style={styles.instructionTitle}>Capture Your Part</Text>
+                <Text style={styles.instructionSubtitle}>
+                  Take a photo or choose from gallery{"\n"}to search for your industrial part
+                </Text>
+              </>
+            )}
+          </View>
         )}
       </View>
 
       {/* Bottom Controls */}
-      <View style={styles.controls}>
+      <View style={[styles.controls, { backgroundColor: colors.black }]}>
         {/* Close Button */}
         <Pressable style={styles.closeButton} onPress={onClose}>
           <Text style={styles.closeIcon}>✕</Text>
         </Pressable>
 
-        {/* Capture/Confirm Button */}
-        <Pressable
-          style={styles.captureButton}
-          onPress={capturedImage ? handleConfirm : handleCapture}
-        >
-          <View style={styles.captureButtonInner} />
-        </Pressable>
-
-        {/* Gallery Button */}
-        <Pressable style={styles.galleryButton}>
-          <View style={styles.galleryIcon} />
-        </Pressable>
+        {/* Action Buttons */}
+        {capturedImage ? (
+          <>
+            <Pressable style={styles.retakeButton} onPress={handleRetake}>
+              <Text style={styles.buttonText}>Retake</Text>
+            </Pressable>
+            <Pressable style={styles.confirmButton} onPress={handleConfirm}>
+              <Text style={styles.buttonText}>Confirm</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <Pressable style={styles.cameraButton} onPress={openCamera} disabled={isLoading}>
+              <View style={styles.buttonContent}>
+                <Ionicons name="camera" size={24} color="#FFFFFF" />
+                <Text style={styles.buttonText}>Camera</Text>
+              </View>
+            </Pressable>
+            <Pressable style={styles.galleryButton} onPress={openGallery} disabled={isLoading}>
+              <View style={styles.buttonContent}>
+                <Ionicons name="images" size={24} color="#FFFFFF" />
+                <Text style={styles.buttonText}>Gallery</Text>
+              </View>
+            </Pressable>
+          </>
+        )}
       </View>
     </View>
   );
@@ -75,7 +187,6 @@ export function CameraScreen({ onCapture, onClose }: CameraScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000000",
   },
   viewfinder: {
     flex: 1,
@@ -83,40 +194,44 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#1F2937",
   },
-  detectionBox: {
-    width: 280,
-    height: 280,
-    borderWidth: 3,
-    borderColor: "#10B981",
-    borderRadius: 12,
-    backgroundColor: "transparent",
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  centerIcon: {
+    marginBottom: 20,
+  },
+  instructionTitle: {
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontWeight: "700",
+    marginTop: 16,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  instructionSubtitle: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  loadingText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    marginTop: 8,
   },
   preview: {
     width: "100%",
     height: "100%",
     resizeMode: "contain",
   },
-  flashButton: {
-    position: "absolute",
-    top: 60,
-    right: 20,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  flashIcon: {
-    fontSize: 24,
-  },
   controls: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 40,
+    justifyContent: "space-around",
+    paddingHorizontal: 20,
     paddingVertical: 40,
-    backgroundColor: "#000000",
   },
   closeButton: {
     width: 56,
@@ -131,34 +246,42 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "600",
   },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 4,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+  retakeButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
-  captureButtonInner: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#FFFFFF",
+  confirmButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: "#10B981",
+  },
+  cameraButton: {
+    flex: 1,
+    marginHorizontal: 8,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: "#3B82F6",
+    alignItems: "center",
   },
   galleryButton: {
-    width: 56,
-    height: 56,
+    flex: 1,
+    marginHorizontal: 8,
+    paddingVertical: 16,
     borderRadius: 12,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
-    justifyContent: "center",
   },
-  galleryIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
