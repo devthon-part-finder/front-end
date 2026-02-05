@@ -1,6 +1,6 @@
 import { Tabs, useRootNavigationState } from "expo-router";
-import { BottomNavbar } from "../../components/BottomNavbar";
-import { TopNavbar } from "../../components/TopNavbar";
+import { BottomNavbar } from "../../components/navbars/BottomNavbar";
+import { TopNavbar } from "../../components/navbars/TopNavbar";
 import { useAuth } from "../../providers/AuthProvider";
 import { LayoutProvider } from "../../providers/LayoutProvider";
 
