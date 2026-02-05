@@ -4,7 +4,7 @@ import React, { createContext, useContext, useMemo } from "react";
 const ThemeContext = createContext({
   colors: {
     background: "#ffffff",
-    surface: "#f5f5f5",
+    surface: "#ffffff",
     text: "#000000",
     mutedText: "#666666",
     primary: "#FFC800",
@@ -20,7 +20,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     () => ({
       colors: {
         background: "#ffffff",
-        surface: "#f5f5f5",
+        surface: "#ffffff",
         text: "#000000",
         mutedText: "#666666",
         primary: "#FFC800",
