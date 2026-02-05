@@ -3,13 +3,15 @@ import React, { createContext, useContext, useMemo } from "react";
 // ThemeProvider: central place for colors and spacing tokens.
 const ThemeContext = createContext({
   colors: {
-    background: "#0F1115",
-    surface: "#171A21",
-    text: "#FFFFFF",
-    mutedText: "#9AA3B2",
-    primary: "#4F7DF3",
-    border: "#2A2F3A",
+    background: "#ffffff",
+    surface: "#f5f5f5",
+    text: "#000000",
+    mutedText: "#666666",
+    primary: "#FFC800",
+    secondary: "#FFD633",
+    border: "#e0e0e0",
     danger: "#F35B5B",
+    black: "#000000",
   },
 });
 
@@ -17,13 +19,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(
     () => ({
       colors: {
-        background: "#0F1115",
-        surface: "#171A21",
-        text: "#FFFFFF",
-        mutedText: "#9AA3B2",
-        primary: "#4F7DF3",
-        border: "#2A2F3A",
+        background: "#ffffff",
+        surface: "#f5f5f5",
+        text: "#000000",
+        mutedText: "#666666",
+        primary: "#FFC800",
+        secondary: "#FFD633",
+        border: "#e0e0e0",
         danger: "#F35B5B",
+        black: "#000000",
       },
     }),
     [],

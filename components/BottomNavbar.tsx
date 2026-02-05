@@ -1,44 +1,82 @@
 import { useTheme } from "@/providers/ThemeProvider";
 import { router, usePathname, type Href } from "expo-router";
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
-// BottomNavbar: minimal two-tab navbar for Home and Example.
+// BottomNavbar: Mobile bottom navigation with Home, Search, and History tabs
 export function BottomNavbar() {
   const { colors } = useTheme();
   const pathname = usePathname();
 
   const isHome = pathname.includes("/home");
-  const isExample = pathname.includes("/example");
+  const isSearch = pathname.includes("/search");
+  const isHistory = pathname.includes("/history");
+
+  const NavigationTab = ({
+    icon,
+    label,
+    isActive,
+    onPress,
+  }: {
+    icon: any;
+    label: string;
+    isActive: boolean;
+    onPress: () => void;
+  }) => (
+    <Pressable onPress={onPress} style={styles.tab}>
+      <Image
+        source={icon}
+        style={[
+          styles.icon,
+          { tintColor: isActive ? colors.primary : colors.mutedText },
+        ]}
+      />
+      <Text
+        style={[
+          styles.label,
+          { color: isActive ? colors.primary : colors.mutedText },
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
 
   return (
-    <View style={[styles.container, { borderTopColor: colors.border }]}>
-      <Pressable
+    <View
+      style={[
+        styles.container,
+        {
+          borderTopColor: colors.border,
+          backgroundColor: colors.background,
+          shadowColor: colors.black,
+        },
+      ]}
+    >
+      <NavigationTab
+        icon={require("@/assets/images/home.png")}
+        label="Home"
+        isActive={isHome}
         onPress={() => router.replace("/(app)/home" as Href)}
-        style={styles.tab}
-      >
-        <Text
-          style={[
-            styles.label,
-            { color: isHome ? colors.primary : colors.mutedText },
-          ]}
-        >
-          Home
-        </Text>
-      </Pressable>
-      <Pressable
-        onPress={() => router.replace("/(app)/example" as Href)}
-        style={styles.tab}
-      >
-        <Text
-          style={[
-            styles.label,
-            { color: isExample ? colors.primary : colors.mutedText },
-          ]}
-        >
-          Example
-        </Text>
-      </Pressable>
+      />
+      <NavigationTab
+        icon={require("@/assets/images/search.png")}
+        label="Search"
+        isActive={isSearch}
+        onPress={() => {
+          // Navigate to search page when implemented
+          console.log("Search pressed");
+        }}
+      />
+      <NavigationTab
+        icon={require("@/assets/images/history.png")}
+        label="History"
+        isActive={isHistory}
+        onPress={() => {
+          // Navigate to history page when implemented
+          console.log("History pressed");
+        }}
+      />
     </View>
   );
 }
@@ -47,15 +85,32 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-around",
-    paddingVertical: 12,
-    borderTopWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderTopWidth: 2,
+    borderRadius: 24,
+    elevation: 8,
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   tab: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    marginBottom: 4,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 12,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });
