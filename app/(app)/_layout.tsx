@@ -1,4 +1,4 @@
-import { Redirect, Tabs, useRootNavigationState } from "expo-router";
+import { Tabs, useRootNavigationState } from "expo-router";
 import { BottomNavbar } from "../../components/BottomNavbar";
 import { TopNavbar } from "../../components/TopNavbar";
 import { useAuth } from "../../providers/AuthProvider";
@@ -13,9 +13,9 @@ export default function AppLayout() {
     return null;
   }
 
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
-  }
+  // if (!isAuthenticated) {
+  //   return <Redirect href="/(auth)/login" />;
+  // }
 
   return (
     <LayoutProvider>

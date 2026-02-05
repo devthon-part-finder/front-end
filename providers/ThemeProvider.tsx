@@ -21,7 +21,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         surface: "#ffffff",
         text: "#FFFFFF",
         mutedText: "#9AA3B2",
-        primary: "#4F7DF3",
+        primary: "#f6e71b",
         border: "#2A2F3A",
         danger: "#F35B5B",
       },
