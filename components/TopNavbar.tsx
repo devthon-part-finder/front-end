@@ -15,15 +15,21 @@ export function TopNavbar() {
     <View
       style={[
         styles.container,
-        { borderColor: colors.border, backgroundColor: colors.surface },
+        {
+          borderColor: colors.border,
+          backgroundColor: colors.background,
+          shadowColor: colors.black,
+        },
       ]}
     >
-      <View style={[styles.titleContainer]}>
+      <View
+        style={[styles.titleContainer, { backgroundColor: colors.secondary }]}
+      >
         <Text style={[styles.title, { color: colors.black }]}>PF</Text>
       </View>
 
       <Pressable
-        style={styles.userContainer}
+        style={[styles.userContainer, { backgroundColor: colors.secondary }]}
         onPress={() => router.replace("/(app)/home" as Href)}
       >
         <Image
@@ -40,19 +46,24 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingHorizontal: 20,
     paddingVertical: 14,
-    borderWidth: 1,
+    borderBottomWidth: 2,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     borderTopWidth: 0,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
   },
   titleContainer: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#FFD700",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -68,7 +79,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#FFD700",
     alignItems: "center",
     justifyContent: "center",
   },

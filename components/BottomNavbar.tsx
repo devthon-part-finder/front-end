@@ -46,7 +46,11 @@ export function BottomNavbar() {
     <View
       style={[
         styles.container,
-        { borderTopColor: colors.border, backgroundColor: colors.background },
+        {
+          borderTopColor: colors.border,
+          backgroundColor: colors.background,
+          shadowColor: colors.black,
+        },
       ]}
     >
       <NavigationTab
@@ -83,10 +87,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderTopWidth: 1,
+    borderTopWidth: 2,
     borderRadius: 24,
     elevation: 8,
-    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: -2,
