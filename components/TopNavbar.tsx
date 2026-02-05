@@ -22,6 +22,7 @@ export function TopNavbar() {
 
 const styles = StyleSheet.create({
   container: {
+    marginTop: 40,
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
