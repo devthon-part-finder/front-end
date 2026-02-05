@@ -1,9 +1,9 @@
 import { router, type Href } from "expo-router";
 import React from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { useAuth } from "../providers/AuthProvider";
-import { useLayout } from "../providers/LayoutProvider";
-import { useTheme } from "../providers/ThemeProvider";
+import { useAuth } from "../../providers/AuthProvider";
+import { useLayout } from "../../providers/LayoutProvider";
+import { useTheme } from "../../providers/ThemeProvider";
 
 // TopNavbar: shows the current screen title and a logout action.
 export function TopNavbar() {
