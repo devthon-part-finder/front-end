@@ -136,27 +136,23 @@ export async function signupApi(input: AuthSignupInput): Promise<AuthSession> {
 export async function refreshAccessTokenApi(
   refreshToken: string,
 ): Promise<AuthSession> {
-  await wait(400);
+  const response = await fetch(`${baseUrl}/api/v1/users/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      refresh_token: refreshToken,
+    }),
+  });
 
-  const record = refreshTokens.get(refreshToken);
-  if (!record || record.expiresAt <= Date.now()) {
-    throw new Error("Refresh token expired. Please log in again.");
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || "Refresh token expired. Please log in again.");
   }
 
-  const expiresIn = 15 * 60;
-  const refreshExpiresIn = Math.max(
-    0,
-    Math.floor((record.expiresAt - Date.now()) / 1000),
-  );
-  const accessToken = createMockToken(record.userId, "access");
-
-  return {
-    access_token: accessToken,
-    token_type: "bearer",
-    expires_in: expiresIn,
-    refresh_token: refreshToken,
-    refresh_expires_in: refreshExpiresIn,
-  };
+  const data: AuthSession = await response.json();
+  return buildSession(data);
 }
 
 export async function sendResetCodeApi(
