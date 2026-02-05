@@ -12,9 +12,14 @@ export function TopNavbar() {
   const { logout } = useAuth();
 
   return (
-    <View style={[styles.container, { borderColor: colors.border }]}>
+    <View
+      style={[
+        styles.container,
+        { borderColor: colors.border, backgroundColor: colors.surface },
+      ]}
+    >
       <View style={[styles.titleContainer]}>
-        <Text style={[styles.title, { color: colors.text }]}>PF</Text>
+        <Text style={[styles.title, { color: colors.black }]}>PF</Text>
       </View>
 
       <Pressable
@@ -36,29 +41,36 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderWidth: 1,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
     borderTopWidth: 0,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   titleContainer: {
-    padding: 10,
-    borderRadius: 30,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#FFD700",
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 18,
     fontWeight: "500",
-    borderRadius: 4,
   },
   action: {
     fontSize: 14,
     fontWeight: "600",
   },
   userContainer: {
-    padding: 10,
-    borderRadius: 30,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#FFD700",
+    alignItems: "center",
+    justifyContent: "center",
   },
   userIcon: {
     width: 24,

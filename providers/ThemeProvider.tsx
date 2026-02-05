@@ -7,9 +7,10 @@ const ThemeContext = createContext({
     surface: "#ffffff",
     text: "#FFFFFF",
     mutedText: "#9AA3B2",
-    primary: "#4F7DF3",
+    primary: "#2d2c2d",
     border: "#2A2F3A",
     danger: "#F35B5B",
+    black: "#000000",
   },
 });
 
@@ -24,6 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         primary: "#f6e71b",
         border: "#2A2F3A",
         danger: "#F35B5B",
+        black: "#000000",
       },
     }),
     [],

@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderTopWidth: 1,
+    borderRadius: 24,
     elevation: 8,
     shadowColor: "#000",
     shadowOffset: {
