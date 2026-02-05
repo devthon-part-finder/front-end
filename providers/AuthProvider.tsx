@@ -5,6 +5,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Platform } from "react-native";
@@ -17,12 +18,10 @@ import {
   type AuthLoginInput,
   type AuthSession,
   type AuthSignupInput,
-  type AuthUser,
-} from "../services/authApi";
+} from "../services/user-service";
 
 // AuthProvider: handles login state and exposes auth actions.
 type AuthContextValue = {
-  user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -41,8 +40,12 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
+type StoredSession = {
+  session: AuthSession;
+  receivedAt: number;
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -53,6 +56,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [refreshTokenExpiresAt, setRefreshTokenExpiresAt] = useState<
     number | null
   >(null);
+  const refreshTokenRef = useRef<string | null>(null);
+  const refreshTokenExpiresAtRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    refreshTokenRef.current = refreshToken;
+  }, [refreshToken]);
+
+  useEffect(() => {
+    refreshTokenExpiresAtRef.current = refreshTokenExpiresAt;
+  }, [refreshTokenExpiresAt]);
 
   const storage = useMemo(
     () => ({
@@ -83,7 +96,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const clearError = useCallback(() => setError(null), []);
 
   const clearSession = useCallback(async () => {
-    setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
     setAccessTokenExpiresAt(null);
@@ -92,51 +104,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [storage]);
 
   const persistSession = useCallback(
-    async (session: AuthSession) => {
-      await storage.setItem("auth.session", JSON.stringify(session));
+    async (session: AuthSession, receivedAt: number) => {
+      const payload: StoredSession = { session, receivedAt };
+      await storage.setItem("auth.session", JSON.stringify(payload));
     },
     [storage],
   );
 
-  const applySession = useCallback((session: AuthSession) => {
-    setUser(session.user);
-    setAccessToken(session.accessToken);
-    setRefreshToken(session.refreshToken);
-    setAccessTokenExpiresAt(session.accessTokenExpiresAt);
-    setRefreshTokenExpiresAt(session.refreshTokenExpiresAt);
-  }, []);
+  const applySession = useCallback(
+    (session: AuthSession, receivedAt: number) => {
+      const accessTokenExpiry = receivedAt + session.expires_in * 1000;
+      const refreshTokenExpiry = receivedAt + session.refresh_expires_in * 1000;
+
+      setAccessToken(session.access_token);
+      setRefreshToken(session.refresh_token);
+      setAccessTokenExpiresAt(accessTokenExpiry);
+      setRefreshTokenExpiresAt(refreshTokenExpiry);
+    },
+    [],
+  );
 
   const refreshAccessToken = useCallback(async () => {
-    if (!refreshToken || !refreshTokenExpiresAt) {
+    const currentRefreshToken = refreshTokenRef.current;
+    const currentRefreshTokenExpiresAt = refreshTokenExpiresAtRef.current;
+
+    if (!currentRefreshToken || !currentRefreshTokenExpiresAt) {
       await clearSession();
       return null;
     }
 
-    if (refreshTokenExpiresAt <= Date.now()) {
+    if (currentRefreshTokenExpiresAt <= Date.now()) {
       await clearSession();
       return null;
     }
 
     try {
-      const result = await refreshAccessTokenApi(refreshToken);
-      setAccessToken(result.accessToken);
-      setAccessTokenExpiresAt(result.accessTokenExpiresAt);
+      const result = await refreshAccessTokenApi(currentRefreshToken);
+      const receivedAt = Date.now();
 
-      const currentSession: AuthSession | null = user
-        ? {
-            user,
-            accessToken: result.accessToken,
-            refreshToken,
-            accessTokenExpiresAt: result.accessTokenExpiresAt,
-            refreshTokenExpiresAt,
-          }
-        : null;
+      applySession(result, receivedAt);
+      await persistSession(result, receivedAt);
 
-      if (currentSession) {
-        await persistSession(currentSession);
-      }
-
-      return result.accessToken;
+      return result.access_token;
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to refresh session.",
@@ -144,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await clearSession();
       return null;
     }
-  }, [clearSession, persistSession, refreshToken, refreshTokenExpiresAt, user]);
+  }, [applySession, clearSession, persistSession]);
 
   const getAuthHeader = useCallback(async () => {
     const now = Date.now();
@@ -168,16 +177,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const parsed: AuthSession = JSON.parse(stored);
-      if (!parsed?.refreshToken || !parsed?.user) {
+      const parsed = JSON.parse(stored) as StoredSession | AuthSession;
+      const session = "session" in parsed ? parsed.session : parsed;
+      const receivedAt =
+        "receivedAt" in parsed ? parsed.receivedAt : Date.now();
+
+      if (!session?.refresh_token) {
         await clearSession();
         return;
       }
 
-      applySession(parsed);
+      applySession(session, receivedAt);
 
       const now = Date.now();
-      if (parsed.accessTokenExpiresAt <= now) {
+      const accessTokenExpiresAt = receivedAt + session.expires_in * 1000;
+      if (accessTokenExpiresAt <= now) {
         await refreshAccessToken();
       }
     } catch (err) {
@@ -199,10 +213,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const session = await loginApi(input);
-      applySession(session);
-      await persistSession(session);
+      const receivedAt = Date.now();
+      applySession(session, receivedAt);
+      await persistSession(session, receivedAt);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -213,10 +229,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     try {
       const session = await signupApi(input);
-      applySession(session);
-      await persistSession(session);
+      const receivedAt = Date.now();
+      applySession(session, receivedAt);
+      await persistSession(session, receivedAt);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -262,8 +280,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      user,
-      isAuthenticated: Boolean(user),
+      isAuthenticated: Boolean(accessToken),
       isLoading,
       error,
       login,
@@ -275,7 +292,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       getAuthHeader,
     }),
     [
-      user,
+      accessToken,
       isLoading,
       error,
       login,

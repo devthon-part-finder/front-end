@@ -8,11 +8,11 @@ export type AuthUser = {
 };
 
 export type AuthSession = {
-  user: AuthUser;
-  accessToken: string;
-  refreshToken: string;
-  accessTokenExpiresAt: number;
-  refreshTokenExpiresAt: number;
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+  refresh_expires_in: number;
 };
 
 export type AuthLoginInput = {
@@ -42,77 +42,100 @@ const refreshTokens = new Map<string, { userId: string; expiresAt: number }>();
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const getApiBaseUrl = () => {
+  const baseUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+  if (!baseUrl) {
+    throw new Error("EXPO_PUBLIC_API_URL is not set.");
+  }
+  return baseUrl.replace(/\/$/, "");
+};
+
+const baseUrl = getApiBaseUrl();
+
 const createMockToken = (userId: string, type: "access" | "refresh") => {
   const random = Math.random().toString(36).slice(2);
   return `${type}.${userId}.${random}`;
 };
 
-const buildSession = (user: AuthUser): AuthSession => {
-  const accessTokenExpiresAt = Date.now() + 15 * 60 * 1000;
-  const refreshTokenExpiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
-  const accessToken = createMockToken(user.id, "access");
-  const refreshToken = createMockToken(user.id, "refresh");
+const buildSession = (data: AuthSession): AuthSession => {
+  const refreshTokenExpiresAt = Date.now() + data.refresh_expires_in * 1000;
 
-  refreshTokens.set(refreshToken, {
-    userId: user.id,
+  refreshTokens.set(data.refresh_token, {
+    userId: "api",
     expiresAt: refreshTokenExpiresAt,
   });
 
   return {
-    user,
-    accessToken,
-    refreshToken,
-    accessTokenExpiresAt,
-    refreshTokenExpiresAt,
+    access_token: data.access_token,
+    token_type: data.token_type,
+    expires_in: data.expires_in,
+    refresh_token: data.refresh_token,
+    refresh_expires_in: data.refresh_expires_in,
   };
 };
 
 export async function loginApi(input: AuthLoginInput): Promise<AuthSession> {
-  await wait(600);
+  const response = await fetch(`${baseUrl}/api/v1/users/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: input.email,
+      password: input.password,
+    }),
+  });
 
-  const user = mockUsers.find(
-    (u) => u.email.toLowerCase() === input.email.toLowerCase(),
-  );
-  if (!user || user.password !== input.password) {
-    throw new Error("Invalid email or password.");
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || "Login failed.");
   }
 
-  return buildSession({
-    id: user.id,
-    username: user.username,
-    email: user.email,
-  });
+  const data: {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    refresh_token: string;
+    refresh_expires_in: number;
+  } = await response.json();
+
+  console.log("Login response data:", data.access_token);
+
+  return buildSession(data);
 }
 
 export async function signupApi(input: AuthSignupInput): Promise<AuthSession> {
-  await wait(700);
+  const response = await fetch(`${baseUrl}/api/v1/users/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: input.email,
+      username: input.username,
+      password: input.password,
+    }),
+  });
 
-  const existing = mockUsers.find(
-    (u) => u.email.toLowerCase() === input.email.toLowerCase(),
-  );
-  if (existing) {
-    throw new Error("An account with this email already exists.");
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || "Signup failed.");
   }
 
-  const newUser: MockUserRecord = {
-    id: String(mockUsers.length + 1),
-    username: input.username,
-    email: input.email,
-    password: input.password,
-  };
+  const data: {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    refresh_token: string;
+    refresh_expires_in: number;
+  } = await response.json();
 
-  mockUsers = [...mockUsers, newUser];
-
-  return buildSession({
-    id: newUser.id,
-    username: newUser.username,
-    email: newUser.email,
-  });
+  return buildSession(data);
 }
 
 export async function refreshAccessTokenApi(
   refreshToken: string,
-): Promise<{ accessToken: string; accessTokenExpiresAt: number }> {
+): Promise<AuthSession> {
   await wait(400);
 
   const record = refreshTokens.get(refreshToken);
@@ -120,10 +143,20 @@ export async function refreshAccessTokenApi(
     throw new Error("Refresh token expired. Please log in again.");
   }
 
+  const expiresIn = 15 * 60;
+  const refreshExpiresIn = Math.max(
+    0,
+    Math.floor((record.expiresAt - Date.now()) / 1000),
+  );
   const accessToken = createMockToken(record.userId, "access");
-  const accessTokenExpiresAt = Date.now() + 15 * 60 * 1000;
 
-  return { accessToken, accessTokenExpiresAt };
+  return {
+    access_token: accessToken,
+    token_type: "bearer",
+    expires_in: expiresIn,
+    refresh_token: refreshToken,
+    refresh_expires_in: refreshExpiresIn,
+  };
 }
 
 export async function sendResetCodeApi(
