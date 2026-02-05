@@ -43,12 +43,11 @@ export function TopNavbar() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
+    marginTop: 50,
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 2,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderRadius: 24,
     borderTopWidth: 0,
     flexDirection: "row",
     alignItems: "center",
