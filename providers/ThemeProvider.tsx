@@ -12,6 +12,10 @@ const ThemeContext = createContext({
     border: "#e0e0e0",
     danger: "#F35B5B",
     black: "#000000",
+    green: "#288936",
+    lightgreen: "#D0F5D3",
+    blue: "#285B89",
+    lightblue: "#D0EDF5",
   },
 });
 
@@ -28,6 +32,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         border: "#e0e0e0",
         danger: "#F35B5B",
         black: "#000000",
+        green: "#288936",
+        lightgreen: "#D0F5D3",
+        blue: "#285B89",
+        lightblue: "#D0EDF5",
       },
     }),
     [],
