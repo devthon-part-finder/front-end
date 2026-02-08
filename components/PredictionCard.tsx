@@ -1,5 +1,6 @@
+import { router } from "expo-router";
 import React from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { useTheme } from "../providers/ThemeProvider";
 
 interface PredictionResult {
@@ -50,12 +51,18 @@ export function PredictionCard() {
   return (
     <View style={styles.container}>
       {predictionResults.map((prediction) => (
-        <View
+        <Pressable
           key={prediction.id}
           style={[
             styles.card,
             { borderColor: colors.primary, backgroundColor: colors.surface },
           ]}
+          onPress={() => {
+            router.push({
+              pathname: "/(app)/predictions/(part)/[id]",
+              params: { id: prediction.id },
+            });
+          }}
         >
           {/* Product image with badge overlay */}
           <View style={styles.imageContainer}>
@@ -139,7 +146,7 @@ export function PredictionCard() {
               </View>
             </View>
           </View>
-        </View>
+        </Pressable>
       ))}
     </View>
   );
