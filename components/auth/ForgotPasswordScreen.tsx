@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useAuth } from "../../providers/AuthProvider";
 import { useTheme } from "../../providers/ThemeProvider";
 import { FormInput } from "../FormInput";
@@ -53,74 +62,90 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.card}>
-        <Text style={[styles.title, { color: colors.text }]}>
-          Forgot password
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-          {step === "email"
-            ? "Enter your email to get a reset code."
-            : "Enter the 6-digit code and your new password."}
-        </Text>
+    <ImageBackground
+      source={require("../../assets/images/auth/bg.png")}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.container}>
+            <View style={styles.card}>
+              <Text style={[styles.title, { color: colors.primary }]}>
+                Part Finder
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.mutedText }]}>
+                {step === "email"
+                  ? "Enter your email to get a reset code."
+                  : "Enter the 6-digit code and your new password."}
+              </Text>
 
-        <View style={styles.form}>
-          <FormInput
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="you@example.com"
-            keyboardType="email-address"
-          />
+              <View style={styles.form}>
+                <FormInput
+                  label="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  keyboardType="email-address"
+                />
 
-          {step === "reset" && (
-            <>
-              <FormInput
-                label="Reset code"
-                value={code}
-                onChangeText={setCode}
-                placeholder="123456"
-                keyboardType="numeric"
-              />
-              <FormInput
-                label="New password"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                placeholder="••••••••"
-                secureTextEntry
-              />
-              <FormInput
-                label="Confirm new password"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                placeholder="••••••••"
-                secureTextEntry
-              />
-            </>
-          )}
+                {step === "reset" && (
+                  <>
+                    <FormInput
+                      label="Reset code"
+                      value={code}
+                      onChangeText={setCode}
+                      placeholder="123456"
+                      keyboardType="numeric"
+                    />
+                    <FormInput
+                      label="New password"
+                      value={newPassword}
+                      onChangeText={setNewPassword}
+                      placeholder="Enter your new password"
+                      secureTextEntry
+                    />
+                    <FormInput
+                      label="Confirm new password"
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
+                      placeholder="Confirm your new password"
+                      secureTextEntry
+                    />
+                  </>
+                )}
 
-          {step === "email" ? (
-            <PrimaryButton
-              title={isLoading ? "Sending..." : "Send code"}
-              onPress={handleSendCode}
-              disabled={isLoading}
-            />
-          ) : (
-            <PrimaryButton
-              title={isLoading ? "Updating..." : "Update password"}
-              onPress={handleResetPassword}
-              disabled={isLoading}
-            />
-          )}
+                {step === "email" ? (
+                  <PrimaryButton
+                    title={isLoading ? "Sending..." : "Send code"}
+                    onPress={handleSendCode}
+                    disabled={isLoading}
+                  />
+                ) : (
+                  <PrimaryButton
+                    title={isLoading ? "Updating..." : "Update password"}
+                    onPress={handleResetPassword}
+                    disabled={isLoading}
+                  />
+                )}
 
-          {mockCode && step === "reset" && (
-            <Text style={[styles.mockText, { color: colors.mutedText }]}>
-              Mock code (dev only): {mockCode}
-            </Text>
-          )}
-        </View>
-      </View>
-    </View>
+                {mockCode && step === "reset" && (
+                  <Text style={[styles.mockText, { color: colors.mutedText }]}>
+                    Mock code (dev only): {mockCode}
+                  </Text>
+                )}
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
 
@@ -129,16 +154,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
   },
   card: {
     gap: 16,
   },
   title: {
-    fontSize: 26,
+    fontSize: 40,
     fontWeight: "700",
+    textAlign: "center",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 20,
+    paddingBottom: 24,
+    textAlign: "center",
   },
   form: {
     gap: 16,
