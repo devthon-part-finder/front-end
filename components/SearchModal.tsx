@@ -1,6 +1,7 @@
 import { useTheme } from "@/providers/ThemeProvider";
 import React, { useState } from "react";
 import {
+    Image,
     KeyboardAvoidingView,
     Modal,
     Platform,
@@ -17,6 +18,7 @@ interface SearchModalProps {
   onClose: () => void;
   onSearch: (data: { coin: string; description: string }) => void;
   onCameraPress: () => void;
+  imageUri?: string | null;
 }
 
 export function SearchModal({
@@ -24,6 +26,7 @@ export function SearchModal({
   onClose,
   onSearch,
   onCameraPress,
+  imageUri,
 }: SearchModalProps) {
   const { colors } = useTheme();
   const [selectedCoin, setSelectedCoin] = useState("");
@@ -39,10 +42,9 @@ export function SearchModal({
   ];
 
   const handleSearch = () => {
-    if (selectedCoin) {
-      onSearch({ coin: selectedCoin, description });
-      onClose();
-    }
+    if (!imageUri) return;
+    onSearch({ coin: selectedCoin, description });
+    onClose();
   };
 
   return (
@@ -52,23 +54,62 @@ export function SearchModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
       >
         <Pressable style={styles.overlay} onPress={onClose}>
-          <Pressable style={[styles.modalContent, { backgroundColor: colors.background }]} onPress={(e) => e.stopPropagation()}>
+          <Pressable
+            style={[
+              styles.modalContent,
+              { backgroundColor: colors.background },
+            ]}
+            onPress={(e) => e.stopPropagation()}
+          >
             {/* Handle bar */}
-            <View style={[styles.handleBar, { backgroundColor: colors.border }]} />
+            <View
+              style={[styles.handleBar, { backgroundColor: colors.border }]}
+            />
 
-            <ScrollView 
+            <ScrollView
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
               {/* Camera Input */}
               <View style={styles.section}>
-                <Pressable style={[styles.cameraInput, { borderColor: colors.border, backgroundColor: colors.surface }]} onPress={onCameraPress}>
-                  <Text style={[styles.cameraPlaceholder, { color: colors.mutedText }]}>Capture your item</Text>
+                <Pressable
+                  style={[
+                    styles.cameraInput,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: colors.surface,
+                    },
+                  ]}
+                  onPress={onCameraPress}
+                >
+                  <View style={styles.cameraLeft}>
+                    {imageUri ? (
+                      <Image
+                        source={{ uri: imageUri }}
+                        style={styles.cameraPreview}
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.cameraPreviewPlaceholder,
+                          { backgroundColor: colors.background },
+                        ]}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.cameraPlaceholder,
+                        { color: imageUri ? colors.text : colors.mutedText },
+                      ]}
+                    >
+                      {imageUri ? "Image ready" : "Capture your item"}
+                    </Text>
+                  </View>
                   <View style={styles.cameraIconContainer}>
                     <Text style={styles.cameraIcon}>📷</Text>
                   </View>
@@ -77,20 +118,44 @@ export function SearchModal({
 
               {/* Select Coin */}
               <View style={styles.section}>
-                <Text style={[styles.label, { color: colors.text }]}>Select Coin</Text>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  Select Coin
+                </Text>
                 <Pressable
-                  style={[styles.picker, { borderColor: colors.border, backgroundColor: colors.background }]}
+                  style={[
+                    styles.picker,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: colors.background,
+                    },
+                  ]}
                   onPress={() => setShowCoinPicker(!showCoinPicker)}
                 >
-                  <Text style={[styles.pickerText, { color: colors.text }, !selectedCoin && { color: colors.mutedText }]}>
+                  <Text
+                    style={[
+                      styles.pickerText,
+                      { color: colors.text },
+                      !selectedCoin && { color: colors.mutedText },
+                    ]}
+                  >
                     {selectedCoin || "Choose a coin..."}
                   </Text>
-                  <Text style={[styles.arrow, { color: colors.mutedText }]}>▼</Text>
+                  <Text style={[styles.arrow, { color: colors.mutedText }]}>
+                    ▼
+                  </Text>
                 </Pressable>
 
                 {showCoinPicker && (
-                  <View style={[styles.pickerDropdown, { borderColor: colors.border, backgroundColor: colors.background }]}>
-                    <ScrollView 
+                  <View
+                    style={[
+                      styles.pickerDropdown,
+                      {
+                        borderColor: colors.border,
+                        backgroundColor: colors.background,
+                      },
+                    ]}
+                  >
+                    <ScrollView
                       nestedScrollEnabled={true}
                       showsVerticalScrollIndicator={true}
                       style={styles.pickerScrollView}
@@ -98,13 +163,23 @@ export function SearchModal({
                       {coins.map((coin) => (
                         <Pressable
                           key={coin}
-                          style={[styles.pickerOption, { borderBottomColor: colors.surface }]}
+                          style={[
+                            styles.pickerOption,
+                            { borderBottomColor: colors.surface },
+                          ]}
                           onPress={() => {
                             setSelectedCoin(coin);
                             setShowCoinPicker(false);
                           }}
                         >
-                          <Text style={[styles.pickerOptionText, { color: colors.text }]}>{coin}</Text>
+                          <Text
+                            style={[
+                              styles.pickerOptionText,
+                              { color: colors.text },
+                            ]}
+                          >
+                            {coin}
+                          </Text>
                         </Pressable>
                       ))}
                     </ScrollView>
@@ -114,8 +189,18 @@ export function SearchModal({
 
               {/* Description */}
               <View style={styles.section}>
-                <Text style={[styles.label, { color: colors.text }]}>Description (Optional)</Text>
-                <View style={[styles.picker, { borderColor: colors.border, backgroundColor: colors.background }]}>
+                <Text style={[styles.label, { color: colors.text }]}>
+                  Description (Optional)
+                </Text>
+                <View
+                  style={[
+                    styles.picker,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: colors.background,
+                    },
+                  ]}
+                >
                   <TextInput
                     style={[styles.pickerText, { color: colors.text }]}
                     placeholder="Add any additional details..."
@@ -130,11 +215,17 @@ export function SearchModal({
 
               {/* Search Button */}
               <Pressable
-                style={[styles.searchButton, { backgroundColor: colors.primary }, !selectedCoin && { backgroundColor: colors.border }]}
+                style={[
+                  styles.searchButton,
+                  { backgroundColor: colors.primary },
+                  !imageUri && { backgroundColor: colors.border },
+                ]}
                 onPress={handleSearch}
-                disabled={!selectedCoin}
+                disabled={!imageUri}
               >
-                <Text style={[styles.searchButtonText, { color: colors.text }]}>Search Your Item</Text>
+                <Text style={[styles.searchButtonText, { color: colors.text }]}>
+                  Search Your Item
+                </Text>
               </Pressable>
             </ScrollView>
           </Pressable>
@@ -179,6 +270,22 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
     borderRadius: 12,
     padding: 16,
+  },
+  cameraLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  cameraPreview: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+  },
+  cameraPreviewPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    opacity: 0.6,
   },
   cameraPlaceholder: {
     fontSize: 14,
