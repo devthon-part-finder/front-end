@@ -5,6 +5,7 @@ import { useMessage } from "@/providers/MessageProvider";
 import { useTheme } from "@/providers/ThemeProvider";
 import { analyzePart } from "@/services/parts-service";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -200,7 +201,7 @@ export default function HomeScreen() {
           if (!isSearching) setShowSearchModal(true);
         }}
       >
-        <Text style={[styles.fabIcon, { color: "white" }]}>+</Text>
+        <Ionicons name="add" size={32} color="white" />
       </Pressable>
 
       {/* Search Modal */}
@@ -309,8 +310,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   fabIcon: {
-    fontSize: 40,
-    fontWeight: "600",
-    lineHeight: 40,
+    fontSize: 60,
+    fontWeight: "900",
   },
 });
