@@ -7,7 +7,6 @@ import {
     searchParts,
     type PartSearchResponse,
 } from "@/services/web-agent-service";
-import { Background } from "@react-navigation/elements";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
