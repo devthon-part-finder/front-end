@@ -46,8 +46,6 @@ const getApiBaseUrl = () => {
   return baseUrl.replace(/\/$/, "");
 };
 
-const baseUrl = getApiBaseUrl();
-
 async function readErrorMessage(response: Response): Promise<string> {
   try {
     const contentType = response.headers.get("content-type") ?? "";
@@ -89,7 +87,7 @@ const buildSession = (data: AuthSession): AuthSession => {
 };
 
 export async function loginApi(input: AuthLoginInput): Promise<AuthSession> {
-  const response = await fetch(`${baseUrl}/api/v1/users/login`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/users/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -119,7 +117,7 @@ export async function loginApi(input: AuthLoginInput): Promise<AuthSession> {
 }
 
 export async function signupApi(input: AuthSignupInput): Promise<AuthSession> {
-  const response = await fetch(`${baseUrl}/api/v1/users/register`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/users/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -150,7 +148,7 @@ export async function signupApi(input: AuthSignupInput): Promise<AuthSession> {
 export async function refreshAccessTokenApi(
   refreshToken: string,
 ): Promise<AuthSession> {
-  const response = await fetch(`${baseUrl}/api/v1/users/refresh`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/users/refresh`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -172,7 +170,7 @@ export async function refreshAccessTokenApi(
 export async function sendResetCodeApi(
   email: string,
 ): Promise<{ message: string }> {
-  const response = await fetch(`${baseUrl}/api/v1/users/forgot-password/send-code`, {
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/users/forgot-password/send-code`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -195,7 +193,7 @@ export async function verifyResetCodeApi(
   code: string,
 ): Promise<{ valid: boolean; message: string }> {
   const response = await fetch(
-    `${baseUrl}/api/v1/users/forgot-password/verify-code`,
+    `${getApiBaseUrl()}/api/v1/users/forgot-password/verify-code`,
     {
       method: "POST",
       headers: {
@@ -221,7 +219,7 @@ export async function resetPasswordApi(
   newPassword: string,
 ): Promise<{ message: string }> {
   const response = await fetch(
-    `${baseUrl}/api/v1/users/forgot-password/reset-password`,
+    `${getApiBaseUrl()}/api/v1/users/forgot-password/reset-password`,
     {
       method: "POST",
       headers: {
