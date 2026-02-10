@@ -74,49 +74,74 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Welcome Banner */}
-      <View style={[styles.banner, { backgroundColor: colors.secondary + "20" }]}>
-        <Text style={[styles.bannerTitle, { color: colors.text }]}>
-          Welcome to the <Text style={[styles.bannerHighlight, { color: colors.primary }]}>Part Finder</Text>
-        </Text>
-        <Text style={[styles.bannerSubtitle, { color: colors.mutedText }]}>
-          The Visual Search Engine for{"\n"}Industrial Hardware
-        </Text>
-      </View>
+      <ScrollView
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        {/* Welcome Banner */}
+        <View
+          style={[styles.banner, { backgroundColor: colors.secondary + "20" }]}
+        >
+          <Text style={[styles.bannerTitle, { color: colors.text }]}>
+            Welcome to the{" "}
+            <Text style={[styles.bannerHighlight, { color: colors.primary }]}>
+              Part Finder
+            </Text>
+          </Text>
+          <Text style={[styles.bannerSubtitle, { color: colors.mutedText }]}>
+            The Visual Search Engine for{"\n"}Industrial Hardware
+          </Text>
+        </View>
 
-      {/* Recent Searches Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Recent Searches</Text>
+        {/* Recent Searches Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Recent Searches
+          </Text>
 
-        {recentSearches.map((search) => (
-          <Pressable
-            key={search.id}
-            style={[styles.searchCard, { backgroundColor: colors.background, borderColor: colors.border }]}
-            onPress={() => console.log("Search pressed:", search.title)}
-          >
-            <Image
-              source={{ uri: search.imageUri }}
-              style={[styles.searchImage, { backgroundColor: colors.surface }]}
-            />
-            <View style={styles.searchContent}>
-              <Text style={[styles.searchTitle, { color: colors.text }]}>{search.title}</Text>
-              <Text style={styles.searchMatches}>
-                {search.matchesCount} matches found
-              </Text>
-              <Text style={[styles.searchTime, { color: colors.mutedText }]}>{search.timeAgo}</Text>
-            </View>
-          </Pressable>
-        ))}
-      </View>
-    </ScrollView>
+          {recentSearches.map((search) => (
+            <Pressable
+              key={search.id}
+              style={[
+                styles.searchCard,
+                {
+                  backgroundColor: colors.background,
+                  borderColor: colors.border,
+                },
+              ]}
+              onPress={() => console.log("Search pressed:", search.title)}
+            >
+              <Image
+                source={{ uri: search.imageUri }}
+                style={[
+                  styles.searchImage,
+                  { backgroundColor: colors.surface },
+                ]}
+              />
+              <View style={styles.searchContent}>
+                <Text style={[styles.searchTitle, { color: colors.text }]}>
+                  {search.title}
+                </Text>
+                <Text style={styles.searchMatches}>
+                  {search.matchesCount} matches found
+                </Text>
+                <Text style={[styles.searchTime, { color: colors.mutedText }]}>
+                  {search.timeAgo}
+                </Text>
+              </View>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
 
       {/* Floating Action Button */}
       <Pressable
-        style={[styles.fab, { backgroundColor: colors.primary, shadowColor: colors.black }]}
+        style={[
+          styles.fab,
+          { backgroundColor: colors.primary, shadowColor: colors.black },
+        ]}
         onPress={() => setShowSearchModal(true)}
       >
-        <Text style={[styles.fabIcon, { color: colors.text }]}>+</Text>
+        <Text style={[styles.fabIcon, { color: "white" }]}>+</Text>
       </Pressable>
 
       {/* Search Modal */}
@@ -208,8 +233,8 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    bottom: 90,
-    right: 20,
+    bottom: 10,
+    right: 10,
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -224,8 +249,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   fabIcon: {
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: "600",
-    lineHeight: 32,
+    lineHeight: 40,
   },
 });

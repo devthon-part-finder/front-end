@@ -26,21 +26,21 @@ export function PrimaryButton({
         },
       ]}
     >
-      <Text style={[styles.text, { color: colors.text }]}>{title}</Text>
+      <Text style={[styles.text, { color: "#FFFFFF" }]}>{title}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    paddingVertical: 13,
+    marginHorizontal: 40,
+    borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
   },
   text: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "500",
   },
 });

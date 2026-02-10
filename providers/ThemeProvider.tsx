@@ -6,7 +6,7 @@ const ThemeContext = createContext({
     background: "#ffffff",
     surface: "#ffffff",
     text: "#000000",
-    mutedText: "#666666",
+    mutedText: "#B8B8B8",
     primary: "#FFC800",
     secondary: "#FFD633",
     border: "#e0e0e0",

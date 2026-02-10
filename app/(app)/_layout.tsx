@@ -1,4 +1,5 @@
-import { Tabs, useRootNavigationState } from "expo-router";
+import { Redirect, Tabs, useRootNavigationState } from "expo-router";
+import { View } from "react-native";
 import { BottomNavbar } from "../../components/navbars/BottomNavbar";
 import { TopNavbar } from "../../components/navbars/TopNavbar";
 import { useAuth } from "../../providers/AuthProvider";
@@ -13,18 +14,20 @@ export default function AppLayout() {
     return null;
   }
 
-  // if (!isAuthenticated) {
-  //   return <Redirect href="/(auth)/login" />;
-  // }
+  if (!isAuthenticated) {
+    return <Redirect href="/(auth)/login" />;
+  }
 
   return (
     <LayoutProvider>
-      <Tabs
-        screenOptions={{
-          header: () => <TopNavbar />,
-        }}
-        tabBar={() => <BottomNavbar />}
-      />
+      <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
+        <Tabs
+          screenOptions={{
+            header: () => <TopNavbar />,
+          }}
+          tabBar={() => <BottomNavbar />}
+        />
+      </View>
     </LayoutProvider>
   );
 }

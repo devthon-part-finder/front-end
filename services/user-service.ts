@@ -1,5 +1,4 @@
-// Mock API implementation for authentication.
-// Replace these with real API calls when backend is ready.
+// API implementation for authentication.
 
 export type AuthUser = {
   id: string;
@@ -37,10 +36,7 @@ let mockUsers: MockUserRecord[] = [
   },
 ];
 
-const resetCodes = new Map<string, string>();
 const refreshTokens = new Map<string, { userId: string; expiresAt: number }>();
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const getApiBaseUrl = () => {
   const baseUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
@@ -51,6 +47,24 @@ const getApiBaseUrl = () => {
 };
 
 const baseUrl = getApiBaseUrl();
+
+async function readErrorMessage(response: Response): Promise<string> {
+  try {
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      const data = (await response.json()) as {
+        message?: string;
+        detail?: string;
+      };
+      return data.message || data.detail || JSON.stringify(data);
+    }
+
+    const text = await response.text();
+    return text || response.statusText;
+  } catch {
+    return response.statusText;
+  }
+}
 
 const createMockToken = (userId: string, type: "access" | "refresh") => {
   const random = Math.random().toString(36).slice(2);
@@ -157,40 +171,72 @@ export async function refreshAccessTokenApi(
 
 export async function sendResetCodeApi(
   email: string,
-): Promise<{ code: string }> {
-  await wait(500);
+): Promise<{ message: string }> {
+  const response = await fetch(`${baseUrl}/api/v1/users/forgot-password/send-code`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
 
-  const user = mockUsers.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase(),
-  );
-  if (!user) {
-    throw new Error("No account found for this email.");
+  if (!response.ok) {
+    throw new Error(
+      (await readErrorMessage(response)) || "Failed to send code.",
+    );
   }
 
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  resetCodes.set(email.toLowerCase(), code);
+  const data: { message: string } = await response.json();
+  return data;
+}
 
-  // In a real API, this code would be emailed. We return it for mock UX.
-  return { code };
+export async function verifyResetCodeApi(
+  email: string,
+  code: string,
+): Promise<{ valid: boolean; message: string }> {
+  const response = await fetch(
+    `${baseUrl}/api/v1/users/forgot-password/verify-code`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, code }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      (await readErrorMessage(response)) || "Failed to verify code.",
+    );
+  }
+
+  const data: { valid: boolean; message: string } = await response.json();
+  return data;
 }
 
 export async function resetPasswordApi(
   email: string,
   code: string,
   newPassword: string,
-): Promise<void> {
-  await wait(600);
-
-  const expectedCode = resetCodes.get(email.toLowerCase());
-  if (!expectedCode || expectedCode !== code) {
-    throw new Error("Invalid or expired reset code.");
-  }
-
-  mockUsers = mockUsers.map((user) =>
-    user.email.toLowerCase() === email.toLowerCase()
-      ? { ...user, password: newPassword }
-      : user,
+): Promise<{ message: string }> {
+  const response = await fetch(
+    `${baseUrl}/api/v1/users/forgot-password/reset-password`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, code, new_password: newPassword }),
+    },
   );
 
-  resetCodes.delete(email.toLowerCase());
+  if (!response.ok) {
+    throw new Error(
+      (await readErrorMessage(response)) || "Failed to reset password.",
+    );
+  }
+
+  const data: { message: string } = await response.json();
+  return data;
 }
