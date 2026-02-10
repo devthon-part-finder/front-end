@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { BottomNavbar } from "../../components/navbars/BottomNavbar";
 import { TopNavbar } from "../../components/navbars/TopNavbar";
 import { useAuth } from "../../providers/AuthProvider";
+import { CatalogSearchProvider } from "../../providers/CatalogSearchProvider";
 import { LayoutProvider } from "../../providers/LayoutProvider";
 
 // App layout: protected routes with top and bottom navigation.
@@ -20,14 +21,16 @@ export default function AppLayout() {
 
   return (
     <LayoutProvider>
-      <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
-        <Tabs
-          screenOptions={{
-            header: () => <TopNavbar />,
-          }}
-          tabBar={() => <BottomNavbar />}
-        />
-      </View>
+      <CatalogSearchProvider>
+        <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
+          <Tabs
+            screenOptions={{
+              header: () => <TopNavbar />,
+            }}
+            tabBar={() => <BottomNavbar />}
+          />
+        </View>
+      </CatalogSearchProvider>
     </LayoutProvider>
   );
 }

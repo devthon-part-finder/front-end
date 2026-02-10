@@ -23,13 +23,7 @@ export function BottomNavbar() {
     isActive: boolean;
     onPress: () => void;
   }) => (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.tab,
-        isActive && { backgroundColor: colors.primary + "20" },
-      ]}
-    >
+    <Pressable onPress={onPress} style={styles.tab}>
       <Image
         source={icon}
         style={[
@@ -67,21 +61,15 @@ export function BottomNavbar() {
       />
       <NavigationTab
         icon={require("@/assets/images/search.png")}
-        label="Search"
+        label="RC Search"
         isActive={isSearch}
-        onPress={() => {
-          // Navigate to search page when implemented
-          router.replace("/(app)/search" as Href);
-        }}
+        onPress={() => router.replace("/(app)/search" as Href)}
       />
       <NavigationTab
         icon={require("@/assets/images/history.png")}
         label="History"
         isActive={isHistory}
-        onPress={() => {
-          // Navigate to history page when implemented
-          router.replace("/(app)/history" as Href);
-        }}
+        onPress={() => router.replace("/(app)/history" as Href)}
       />
     </View>
   );
@@ -92,7 +80,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     paddingVertical: 8,
-    paddingBottom: 16,
     paddingHorizontal: 16,
     borderTopWidth: 2,
     borderRadius: 24,
@@ -103,16 +90,13 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-    gap: 12,
   },
   tab: {
-    width: 70,
-    height: 70,
+    flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
-
   icon: {
     width: 24,
     height: 24,
