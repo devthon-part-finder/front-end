@@ -10,6 +10,7 @@ export function FormInput({
   placeholder,
   secureTextEntry,
   keyboardType,
+  editable,
 }: {
   label: string;
   value: string;
@@ -17,16 +18,17 @@ export function FormInput({
   placeholder?: string;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "numeric";
+  editable?: boolean;
 }) {
   const { colors } = useTheme();
 
   return (
     <View style={styles.wrapper}>
-      <Text style={[styles.label, { color: colors.mutedText }]}>{label}</Text>
+      <Text style={[styles.label, { color: colors.black }]}>{label}</Text>
       <TextInput
         style={[
           styles.input,
-          { borderColor: colors.border, color: colors.text },
+          { borderColor: colors.mutedText, color: colors.text },
         ]}
         placeholder={placeholder}
         placeholderTextColor={colors.mutedText}
@@ -34,6 +36,7 @@ export function FormInput({
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
+        editable={editable}
         autoCapitalize={"none"}
       />
     </View>
@@ -45,15 +48,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    fontSize: 12,
-    textTransform: "uppercase",
+    fontSize: 16,
+    fontWeight: "600",
+    // textTransform: "uppercase",
     letterSpacing: 1,
   },
   input: {
     borderWidth: 1,
     borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 16,
+    backgroundColor: "#ffffff",
   },
 });

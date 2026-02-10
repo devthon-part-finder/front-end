@@ -15,6 +15,7 @@ import {
   resetPasswordApi,
   sendResetCodeApi,
   signupApi,
+  verifyResetCodeApi,
   type AuthLoginInput,
   type AuthSession,
   type AuthSignupInput,
@@ -27,8 +28,9 @@ type AuthContextValue = {
   error: string | null;
   login: (input: AuthLoginInput) => Promise<void>;
   signup: (input: AuthSignupInput) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   sendResetCode: (email: string) => Promise<string>;
+  verifyResetCode: (email: string, code: string) => Promise<void>;
   resetPassword: (
     email: string,
     code: string,
@@ -240,21 +242,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
-    void clearSession();
+  const logout = async () => {
+    await clearSession();
   };
 
   const sendResetCode = async (email: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const { code } = await sendResetCodeApi(email);
-      return code;
+      const { message } = await sendResetCodeApi(email);
+      return message;
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to send reset code.",
       );
-      return "";
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyResetCode = async (email: string, code: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await verifyResetCodeApi(email, code);
+      if (!result.valid) {
+        throw new Error(result.message || "Invalid verification code.");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to verify reset code.",
+      );
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -273,6 +293,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(
         err instanceof Error ? err.message : "Failed to reset password.",
       );
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -287,6 +308,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signup,
       logout,
       sendResetCode,
+      verifyResetCode,
       resetPassword,
       clearError,
       getAuthHeader,
@@ -299,6 +321,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signup,
       logout,
       sendResetCode,
+      verifyResetCode,
       resetPassword,
       clearError,
       getAuthHeader,

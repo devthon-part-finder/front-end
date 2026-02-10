@@ -1,5 +1,5 @@
 import { useAuth } from "@/providers/AuthProvider";
-import { Redirect, useRootNavigationState } from "expo-router";
+import { Redirect, type Href, useRootNavigationState } from "expo-router";
 
 // Entry route: decides where to go based on auth state.
 export default function Index() {
@@ -13,6 +13,6 @@ export default function Index() {
   return isAuthenticated ? (
     <Redirect href="/(app)/home" />
   ) : (
-    <Redirect href="/(auth)/login" />
+    <Redirect href={"/(auth)/welcome" as Href} />
   );
 }

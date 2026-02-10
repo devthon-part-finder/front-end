@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/providers/AuthProvider";
+import { MessageProvider } from "@/providers/MessageProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Stack } from "expo-router";
 
@@ -6,9 +7,11 @@ import { Stack } from "expo-router";
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Stack screenOptions={{ headerShown: false }} />
-      </AuthProvider>
+      <MessageProvider>
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </AuthProvider>
+      </MessageProvider>
     </ThemeProvider>
   );
 }
