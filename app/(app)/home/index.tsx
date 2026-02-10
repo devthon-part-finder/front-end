@@ -102,8 +102,12 @@ export default function HomeScreen() {
       }
 
       router.push({
-        pathname: "/(app)/predictions",
+        pathname: "/(pages)/predictions" as any,
         params: {
+          part_name: `${result.inferred_type ?? ""} ${data.description ?? ""}`
+            .trim()
+            .replace(/\s+/g, " "),
+          location: "Sri Lanka",
           inferred_type: result.inferred_type ?? "Unknown",
           width_mm: String(result.dimensions?.width_mm ?? ""),
           height_mm: String(result.dimensions?.height_mm ?? ""),

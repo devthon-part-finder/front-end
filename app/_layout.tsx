@@ -20,7 +20,8 @@ function ThemedStatusBar() {
   const { colors } = useTheme();
   const style = getStatusBarStyle(colors.background);
 
-  return <StatusBar style={style} backgroundColor={colors.background} />;
+  const backgroundColor = style === "dark" ? "#ffffff" : colors.background;
+  return <StatusBar style={style} backgroundColor={backgroundColor} />;
 }
 
 // Root layout: wires up global providers and the app router.
