@@ -24,7 +24,7 @@ export function TopNavbar() {
       <View
         style={[styles.titleContainer, { backgroundColor: colors.secondary }]}
       >
-        <Text style={[styles.title, { color: colors.black }]}>P</Text>
+        <Text style={[styles.title, { color: "white" }]}>P</Text>
       </View>
 
       <Pressable
@@ -46,9 +46,9 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 50,
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 2,
-    borderRadius: 24,
+    // borderRadius: 24,
     borderTopWidth: 0,
     flexDirection: "row",
     alignItems: "center",
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 18,
-    fontWeight: "500",
+    fontSize: 20,
+    fontWeight: "700",
   },
   action: {
     fontSize: 14,
