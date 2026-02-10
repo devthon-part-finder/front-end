@@ -1,5 +1,5 @@
-import { router, type Href } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams, type Href } from "expo-router";
+import React, { useMemo, useState } from "react";
 import {
     ImageBackground,
     KeyboardAvoidingView,
@@ -15,25 +15,27 @@ import { useTheme } from "../../providers/ThemeProvider";
 import { FormInput } from "../FormInput";
 import { PrimaryButton } from "../PrimaryButton";
 
-// Forgot password screen: request a 6-digit verification code by email.
-export default function ForgotPasswordScreen() {
+// Verify code screen: enter 6-digit code sent to email.
+export default function VerifyCodeScreen() {
   const { colors } = useTheme();
-  const { sendResetCode, isLoading } = useAuth();
+  const { verifyResetCode, isLoading } = useAuth();
   const { showMessage } = useMessage();
 
-  const [email, setEmail] = useState("");
+  const params = useLocalSearchParams<{ email?: string }>();
+  const email = useMemo(
+    () => (params.email ? String(params.email) : ""),
+    [params.email],
+  );
 
-  const handleSendCode = async () => {
+  const [code, setCode] = useState("");
+
+  const handleVerify = async () => {
     try {
-      const message = await sendResetCode(email);
-      showMessage({
-        type: "success",
-        message: message || "Reset code sent. Check your email.",
-      });
-
+      await verifyResetCode(email, code);
+      showMessage({ type: "success", message: "Code verified successfully." });
       router.push({
-        pathname: "/(auth)/forgot-password/verify-code",
-        params: { email },
+        pathname: "/(auth)/forgot-password/reset-password",
+        params: { email, code },
       } as unknown as Href);
     } catch (error) {
       showMessage({
@@ -63,21 +65,29 @@ export default function ForgotPasswordScreen() {
                 Part Finder
               </Text>
               <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-                Enter your email to get a reset code.
+                Enter the 6-digit code sent to your email.
               </Text>
 
               <View style={styles.form}>
                 <FormInput
                   label="Email"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={() => undefined}
                   placeholder="Enter your email"
                   keyboardType="email-address"
+                  editable={false}
+                />
+                <FormInput
+                  label="Verification code"
+                  value={code}
+                  onChangeText={setCode}
+                  placeholder="123456"
+                  keyboardType="numeric"
                 />
 
                 <PrimaryButton
-                  title={isLoading ? "Sending..." : "Send code"}
-                  onPress={handleSendCode}
+                  title={isLoading ? "Verifying..." : "Verify code"}
+                  onPress={handleVerify}
                   disabled={isLoading}
                 />
               </View>

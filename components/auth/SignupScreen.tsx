@@ -1,16 +1,16 @@
 import { router, type Href } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { useAuth } from "../../providers/AuthProvider";
+import { useMessage } from "../../providers/MessageProvider";
 import { useTheme } from "../../providers/ThemeProvider";
 import { FormInput } from "../FormInput";
 import { PrimaryButton } from "../PrimaryButton";
@@ -19,6 +19,7 @@ import { PrimaryButton } from "../PrimaryButton";
 export default function SignupScreen() {
   const { colors } = useTheme();
   const { signup, isLoading } = useAuth();
+  const { showMessage } = useMessage();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -27,7 +28,10 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
     if (password !== confirmPassword) {
-      Alert.alert("Passwords do not match", "Please confirm your password.");
+      showMessage({
+        type: "error",
+        message: "Passwords do not match. Please confirm your password.",
+      });
       return;
     }
 
@@ -35,7 +39,10 @@ export default function SignupScreen() {
       await signup({ username, email, password });
       router.replace("/(app)/home" as Href);
     } catch (error) {
-      Alert.alert("Signup failed", String((error as Error).message || error));
+      showMessage({
+        type: "error",
+        message: String((error as Error).message || error),
+      });
     }
   };
 

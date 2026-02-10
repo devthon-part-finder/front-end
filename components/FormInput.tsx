@@ -10,6 +10,7 @@ export function FormInput({
   placeholder,
   secureTextEntry,
   keyboardType,
+  editable,
 }: {
   label: string;
   value: string;
@@ -17,6 +18,7 @@ export function FormInput({
   placeholder?: string;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address" | "numeric";
+  editable?: boolean;
 }) {
   const { colors } = useTheme();
 
@@ -34,6 +36,7 @@ export function FormInput({
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
+        editable={editable}
         autoCapitalize={"none"}
       />
     </View>

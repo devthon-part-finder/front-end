@@ -1,13 +1,13 @@
-import { router, type Href } from "expo-router";
-import React, { useState } from "react";
+import { router, useLocalSearchParams, type Href } from "expo-router";
+import React, { useMemo, useState } from "react";
 import {
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { useAuth } from "../../providers/AuthProvider";
 import { useMessage } from "../../providers/MessageProvider";
@@ -15,19 +15,41 @@ import { useTheme } from "../../providers/ThemeProvider";
 import { FormInput } from "../FormInput";
 import { PrimaryButton } from "../PrimaryButton";
 
-// Login screen: email + password authentication.
-export default function LoginScreen() {
+// Reset password screen: set a new password using verified code.
+export default function ResetPasswordScreen() {
   const { colors } = useTheme();
-  const { login, isLoading } = useAuth();
+  const { resetPassword, isLoading } = useAuth();
   const { showMessage } = useMessage();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const params = useLocalSearchParams<{ email?: string; code?: string }>();
+  const email = useMemo(
+    () => (params.email ? String(params.email) : ""),
+    [params.email],
+  );
+  const code = useMemo(
+    () => (params.code ? String(params.code) : ""),
+    [params.code],
+  );
 
-  const handleLogin = async () => {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleReset = async () => {
+    if (!newPassword || newPassword !== confirmPassword) {
+      showMessage({
+        type: "error",
+        message: "Passwords do not match. Please confirm your new password.",
+      });
+      return;
+    }
+
     try {
-      await login({ email, password });
-      router.replace("/(app)/home" as Href);
+      await resetPassword(email, code, newPassword);
+      showMessage({
+        type: "success",
+        message: "Password updated. You can now sign in.",
+      });
+      router.replace("/(auth)/login" as Href);
     } catch (error) {
       showMessage({
         type: "error",
@@ -56,55 +78,38 @@ export default function LoginScreen() {
                 Part Finder
               </Text>
               <Text style={[styles.subtitle, { color: colors.mutedText }]}>
-                The Visual Search Engine for Industrial Hardware
+                Create a new password for your account.
               </Text>
 
               <View style={styles.form}>
                 <FormInput
                   label="Email"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={() => undefined}
                   placeholder="Enter your email"
                   keyboardType="email-address"
+                  editable={false}
                 />
                 <FormInput
-                  label="Password"
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Enter your password"
+                  label="New password"
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  placeholder="Enter your new password"
                   secureTextEntry
                 />
-                <View style={styles.forgotPasswordContainer}>
-                  <Text
-                    style={[styles.linkText, { color: colors.mutedText }]}
-                    onPress={() => router.push("/(auth)/forgot-password")}
-                  >
-                    Forgot password?
-                  </Text>
-                </View>
+                <FormInput
+                  label="Confirm new password"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder="Confirm your new password"
+                  secureTextEntry
+                />
+
                 <PrimaryButton
-                  title={isLoading ? "Signing in..." : "Login with PartFinder"}
-                  onPress={handleLogin}
+                  title={isLoading ? "Updating..." : "Update password"}
+                  onPress={handleReset}
                   disabled={isLoading}
                 />
-              </View>
-
-              <View style={styles.createAccountContainer}>
-                <Text
-                  style={[styles.linkText, { color: colors.mutedText }]}
-                  onPress={() => router.push("/(auth)/signup")}
-                >
-                  Don’t have an account?
-                </Text>
-                <Text
-                  style={[
-                    styles.linkText,
-                    { color: colors.black, fontWeight: "700" },
-                  ]}
-                  onPress={() => router.push("/(auth)/signup")}
-                >
-                  Create account
-                </Text>
               </View>
             </View>
           </View>
@@ -134,24 +139,10 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 20,
-    paddingBottom: 48,
+    paddingBottom: 24,
     textAlign: "center",
   },
   form: {
     gap: 16,
-  },
-  createAccountContainer: {
-    marginTop: 8,
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 4,
-  },
-  forgotPasswordContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-  },
-  linkText: {
-    fontWeight: "500",
-    fontSize: 16,
   },
 });
