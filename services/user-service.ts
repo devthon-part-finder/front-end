@@ -170,13 +170,16 @@ export async function refreshAccessTokenApi(
 export async function sendResetCodeApi(
   email: string,
 ): Promise<{ message: string }> {
-  const response = await fetch(`${getApiBaseUrl()}/api/v1/users/forgot-password/send-code`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${getApiBaseUrl()}/api/v1/users/forgot-password/send-code`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
     },
-    body: JSON.stringify({ email }),
-  });
+  );
 
   if (!response.ok) {
     throw new Error(
