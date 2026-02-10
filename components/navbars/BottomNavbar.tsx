@@ -23,7 +23,13 @@ export function BottomNavbar() {
     isActive: boolean;
     onPress: () => void;
   }) => (
-    <Pressable onPress={onPress} style={styles.tab}>
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.tab,
+        isActive && { backgroundColor: colors.primary + "20" },
+      ]}
+    >
       <Image
         source={icon}
         style={[
@@ -65,7 +71,7 @@ export function BottomNavbar() {
         isActive={isSearch}
         onPress={() => {
           // Navigate to search page when implemented
-          console.log("Search pressed");
+          router.replace("/(app)/search" as Href);
         }}
       />
       <NavigationTab
@@ -74,7 +80,7 @@ export function BottomNavbar() {
         isActive={isHistory}
         onPress={() => {
           // Navigate to history page when implemented
-          console.log("History pressed");
+          router.replace("/(app)/history" as Href);
         }}
       />
     </View>
@@ -86,6 +92,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     paddingVertical: 8,
+    paddingBottom: 16,
     paddingHorizontal: 16,
     borderTopWidth: 2,
     borderRadius: 24,
@@ -96,13 +103,16 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+    gap: 12,
   },
   tab: {
-    flex: 1,
+    width: 70,
+    height: 70,
     alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    justifyContent: "center",
+    borderRadius: 12,
   },
+
   icon: {
     width: 24,
     height: 24,
