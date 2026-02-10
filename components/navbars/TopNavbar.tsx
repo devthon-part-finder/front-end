@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { useLayout } from "../../providers/LayoutProvider";
 import { useTheme } from "../../providers/ThemeProvider";
 import { UserMenu } from "../UserMenu";
 
 // TopNavbar: shows the current screen title and a logout action.
 export function TopNavbar() {
   const { colors } = useTheme();
-  const { title } = useLayout();
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (
@@ -44,7 +42,7 @@ export function TopNavbar() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 50,
+    paddingTop: 50,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 2,
